@@ -360,6 +360,8 @@ namespace DCURSES {
 		SetMCMFloat("lockDifficultyModifier",settings->lockDifficultyModifier);
 		settings->arousalModifier = 1.4f;
 		SetMCMFloat("arousalModifier",settings->arousalModifier);
+		settings->arousalHalfLife = 12.0f;
+		SetMCMFloat("arousalHalfLife",settings->arousalHalfLife);
 		settings->keyLossChance = 80.0f;
 		SetMCMFloat("keyLossChance",settings->keyLossChance);
 		settings->keyChance = 7.0f;
@@ -440,6 +442,8 @@ namespace DCURSES {
 		SetMCMFloat("arousalPotionChance",settings->arousalPotionChance);
 		settings->arousalPotionLibido = 10.0f;
 		SetMCMFloat("arousalPotionLibido",settings->arousalPotionLibido);
+		settings->arousalPotionDuration = 24.0f;
+		SetMCMFloat("arousalPotionDuration",settings->arousalPotionDuration);
 		settings->consTalkNude = 35.0f;
 		SetMCMFloat("consTalkNude",settings->consTalkNude);
 		settings->consTalkRestrained = 10.0f;
@@ -762,6 +766,8 @@ namespace DCURSES {
 		SetMCMBool("helpRapeTattoosInstalled",settings->helpRapeTattoosInstalled);
 		settings->helpOSLArousedInstalled = false;
 		SetMCMBool("helpOSLArousedInstalled",settings->helpOSLArousedInstalled);
+		settings->helpSLOArousedInstalled = false;
+		SetMCMBool("helpSLOArousedInstalled",settings->helpSLOArousedInstalled);
 		settings->helpUDInstalled = false;
 		SetMCMBool("helpUDInstalled",settings->helpUDInstalled);
 		settings->helpQuickLootInstalled = false;
@@ -933,6 +939,7 @@ namespace DCURSES {
 			{"lockedModifier", settings->lockedModifier},
 			{"lockDifficultyModifier", settings->lockDifficultyModifier},
 			{"arousalModifier", settings->arousalModifier},
+			{"arousalHalfLife", settings->arousalHalfLife},
 			{"keyLossChance", settings->keyLossChance},
 			{"keyChance", settings->keyChance},
 			{"keyBonus", settings->keyBonus},
@@ -973,6 +980,7 @@ namespace DCURSES {
 			{"tatSolventChance", settings->tatSolventChance},
 			{"arousalPotionChance", settings->arousalPotionChance},
 			{"arousalPotionLibido", settings->arousalPotionLibido},
+			{"arousalPotionDuration", settings->arousalPotionDuration},
 			{"consTalkNude", settings->consTalkNude},
 			{"consTalkRestrained", settings->consTalkRestrained},
 			{"consTalkHeavy", settings->consTalkHeavy},
@@ -1134,6 +1142,7 @@ namespace DCURSES {
 			{"helpLewdMarksInstalled", settings->helpLewdMarksInstalled},
 			{"helpRapeTattoosInstalled", settings->helpRapeTattoosInstalled},
 			{"helpOSLArousedInstalled", settings->helpOSLArousedInstalled},
+			{"helpSLOArousedInstalled", settings->helpSLOArousedInstalled},
 			{"helpUDInstalled", settings->helpUDInstalled},
 			{"helpQuickLootInstalled", settings->helpQuickLootInstalled},
 			{"helpDWDInstalled", settings->helpDWDInstalled},
@@ -1463,6 +1472,8 @@ namespace DCURSES {
 		if (settings->lockDifficultyModifier < 0) {settings->lockDifficultyModifier = 0;}
 		settings->arousalModifier = static_cast<float>(j.value("arousalModifier", 1.4));
 		if (settings->arousalModifier < 0) {settings->arousalModifier = 0;}
+		settings->arousalHalfLife = static_cast<float>(j.value("arousalHalfLife", 12.0));
+		if (settings->arousalHalfLife < 0) {settings->arousalHalfLife = 0;}
 		settings->keyLossChance = static_cast<float>(j.value("keyLossChance", 80.0));
 		if (settings->keyLossChance < 0) {settings->keyLossChance = 0;}
 		settings->keyChance = static_cast<float>(j.value("keyChance", 7.0));
@@ -1543,6 +1554,8 @@ namespace DCURSES {
 		if (settings->arousalPotionChance < 0) {settings->arousalPotionChance = 0;}
 		settings->arousalPotionLibido = static_cast<float>(j.value("arousalPotionLibido", 10.0));
 		if (settings->arousalPotionLibido < 0) {settings->arousalPotionLibido = 0;}
+		settings->arousalPotionDuration = static_cast<float>(j.value("arousalPotionDuration", 24.0));
+		if (settings->arousalPotionDuration < 0) {settings->arousalPotionDuration = 0;}
 		settings->consTalkNude = static_cast<float>(j.value("consTalkNude", 35.0));
 		if (settings->consTalkNude < 0) {settings->consTalkNude = 0;}
 		settings->consTalkRestrained = static_cast<float>(j.value("consTalkRestrained", 10.0));
@@ -1733,6 +1746,7 @@ namespace DCURSES {
 		settings->helpLewdMarksInstalled = static_cast<bool>(j.value("helpLewdMarksInstalled", false));
 		settings->helpRapeTattoosInstalled = static_cast<bool>(j.value("helpRapeTattoosInstalled", false));
 		settings->helpOSLArousedInstalled = static_cast<bool>(j.value("helpOSLArousedInstalled", false));
+		settings->helpSLOArousedInstalled = static_cast<bool>(j.value("helpSLOArousedInstalled", false));
 		settings->helpUDInstalled = static_cast<bool>(j.value("helpUDInstalled", false));
 		settings->helpQuickLootInstalled = static_cast<bool>(j.value("helpQuickLootInstalled", false));
 		settings->helpDWDInstalled = static_cast<bool>(j.value("helpDWDInstalled", false));
@@ -1755,6 +1769,7 @@ namespace DCURSES {
 		SetMCMBool("helpLewdMarksInstalled", CheckLewdMarksInstalled());
 		SetMCMBool("helpRapeTattoosInstalled", CheckRapeTattoos());
 		SetMCMBool("helpOSLArousedInstalled", CheckOSL());
+		SetMCMBool("helpSLOArousedInstalled", CheckSLOAroused());
 		SetMCMBool("helpUDInstalled", CheckUD());
 		SetMCMBool("helpQuickLootInstalled", QuickLoot::API3::QuickLootAPI::IsReady() || QuickLoot::API4::QuickLootAPI::IsReady());
 		SetMCMBool("helpDWDInstalled", CheckWickedDevices());
@@ -1915,6 +1930,7 @@ namespace DCURSES {
 		SetMCMFloat("lockedModifier",settings->lockedModifier);
 		SetMCMFloat("lockDifficultyModifier",settings->lockDifficultyModifier);
 		SetMCMFloat("arousalModifier",settings->arousalModifier);
+		SetMCMFloat("arousalHalfLife",settings->arousalHalfLife);
 		SetMCMFloat("keyLossChance",settings->keyLossChance);
 		SetMCMFloat("keyChance",settings->keyChance);
 		SetMCMFloat("keyBonus",settings->keyBonus);
@@ -1955,6 +1971,7 @@ namespace DCURSES {
 		SetMCMFloat("tatSolventChance",settings->tatSolventChance);
 		SetMCMFloat("arousalPotionChance",settings->arousalPotionChance);
 		SetMCMFloat("arousalPotionLibido",settings->arousalPotionLibido);
+		SetMCMFloat("arousalPotionDuration",settings->arousalPotionDuration);
 		SetMCMFloat("consTalkNude",settings->consTalkNude);
 		SetMCMFloat("consTalkRestrained",settings->consTalkRestrained);
 		SetMCMFloat("consTalkHeavy",settings->consTalkHeavy);
@@ -2116,6 +2133,7 @@ namespace DCURSES {
 		SetMCMBool("helpLewdMarksInstalled",settings->helpLewdMarksInstalled);
 		SetMCMBool("helpRapeTattoosInstalled",settings->helpRapeTattoosInstalled);
 		SetMCMBool("helpOSLArousedInstalled",settings->helpOSLArousedInstalled);
+		SetMCMBool("helpSLOArousedInstalled",settings->helpSLOArousedInstalled);
 		SetMCMBool("helpUDInstalled",settings->helpUDInstalled);
 		SetMCMBool("helpQuickLootInstalled",settings->helpQuickLootInstalled);
 		SetMCMBool("helpDWDInstalled",settings->helpDWDInstalled);
@@ -2420,6 +2438,8 @@ namespace DCURSES {
 		if (settings->lockDifficultyModifier < 0) {settings->lockDifficultyModifier = 0;}
 		settings->arousalModifier = MCMSetting("arousalModifier")->GetFloat();
 		if (settings->arousalModifier < 0) {settings->arousalModifier = 0;}
+		settings->arousalHalfLife = MCMSetting("arousalHalfLife")->GetFloat();
+		if (settings->arousalHalfLife < 0) {settings->arousalHalfLife = 0;}
 		settings->keyLossChance = MCMSetting("keyLossChance")->GetFloat();
 		if (settings->keyLossChance < 0) {settings->keyLossChance = 0;}
 		settings->keyChance = MCMSetting("keyChance")->GetFloat();
@@ -2500,6 +2520,8 @@ namespace DCURSES {
 		if (settings->arousalPotionChance < 0) {settings->arousalPotionChance = 0;}
 		settings->arousalPotionLibido = MCMSetting("arousalPotionLibido")->GetFloat();
 		if (settings->arousalPotionLibido < 0) {settings->arousalPotionLibido = 0;}
+		settings->arousalPotionDuration = MCMSetting("arousalPotionDuration")->GetFloat();
+		if (settings->arousalPotionDuration < 0) {settings->arousalPotionDuration = 0;}
 		settings->consTalkNude = MCMSetting("consTalkNude")->GetFloat();
 		if (settings->consTalkNude < 0) {settings->consTalkNude = 0;}
 		settings->consTalkRestrained = MCMSetting("consTalkRestrained")->GetFloat();
@@ -2690,6 +2712,7 @@ namespace DCURSES {
 		settings->helpLewdMarksInstalled = MCMSetting("helpLewdMarksInstalled")->GetBool();
 		settings->helpRapeTattoosInstalled = MCMSetting("helpRapeTattoosInstalled")->GetBool();
 		settings->helpOSLArousedInstalled = MCMSetting("helpOSLArousedInstalled")->GetBool();
+		settings->helpSLOArousedInstalled = MCMSetting("helpSLOArousedInstalled")->GetBool();
 		settings->helpUDInstalled = MCMSetting("helpUDInstalled")->GetBool();
 		settings->helpQuickLootInstalled = MCMSetting("helpQuickLootInstalled")->GetBool();
 		settings->helpDWDInstalled = MCMSetting("helpDWDInstalled")->GetBool();

@@ -38,6 +38,7 @@ namespace DCURSES {
 		//Flag flag_LockOppDevice_Menu			//!oppDeviceAntiCheat || !WearingOppressiveDevice() 
 		//Flag flag_WickedDevices				//ESP:Devious Wicked Devices.esp
 		//Flag flag_AND							//ESP:Advanced Nudity Detection.esp
+		//Flag flag_SLOAroused					//helpSLOArousedInstalled
 		
 		//Page Main								
 		//Header Chances
@@ -65,6 +66,7 @@ namespace DCURSES {
 		//Header Arousal
 		float arousalModifier = 1.4f;			//Arousal Modifier//If this is greater than 1, curses will me more likely the more aroused the player is.\nIf set to 10 with full arousal will multiply the chance by 10 while half arousal would multiply the chance by 5.//{1}//(1,10,0.1)
 		int minArousal = 10;					//Minimum Arousal//Curses won't trigger if the player is below this arousal level.//{0}//(0,100,1)
+		float arousalHalfLife = 12.0f;			//Arousal Half-Life//SLO Aroused NG only. The arousal this mod adds loses half its value every this many game hours.//{0}//(1,72,1)		?:? flag_SLOAroused
 		
 		//Page Devices
 		//Header Chastity
@@ -352,6 +354,7 @@ namespace DCURSES {
 		float tatSolventChance = 0.5f;			//Universal Solvent Chance//Chance to find universal solvent when looting dead bodies. Universal solvent will remove all lewd marks and tattoos.\nHaving more tattoos will slightly increase the chance of finding one.\nSet to 0 to disable.//{2}%//(0,100,0.01)
 		float arousalPotionChance = 5.0f;		//Frigid Wash Chance//Chance to find a potion that will reduce your arousal. The chance increases slightly with high arousal.\nYou can only cary a max of 3 at a time.//{2}%//(0,100,0.01)
 		float arousalPotionLibido = 10.0f;		//Frigid Wash Libido//How much your libido will decrease when drinking a frigid wash. Only works if OSLAroused is installed.//{1}//(0,100,0.1)
+		float arousalPotionDuration = 24.0f;	//Frigid Wash Duration//SLO Aroused NG only. A frigid wash lowers your arousal by 100, then wears off evenly over this many game hours.//{0}//(1,72,1)		?:? flag_SLOAroused
 		bool restrictFastTravel = true;			//Restrict Fast Travel//You will be unable to fast travel when wearing heavy bondage, hobbling devices, boots, and blindfolds.								**RELOAD
 		bool restrictFastTravelPart = false;	//Partial Restrict Fast Travel//You will be unable to fast travel when wearing any visible devices.															?:? flag_ft_restricted
 		bool restrictFastTravelFull = false;	//Fully Restrict Fast Travel//You will be unable to fast travel when wearing any devices.																	?:? flag_ft_restricted
@@ -515,7 +518,8 @@ namespace DCURSES {
 		bool helpLewdMarksInstalled = false;	//Lewd Marks//Lewd marks must be installed for Slave Tats Without the Glow Patch.\nINSTALLING WITH GLOW PATCH WILL BREAK SLAVE TATS NG									**NO_OPT
 		bool helpRapeTattoosInstalled = false;	//Rape Tattoos//Rape tattoos is required for the random tattoo event, and is not required for lewd marks.																**NO_OPT
 		//Header Other Integrations
-		bool helpOSLArousedInstalled = false;	//OSL Aroused//The arousal system that this mod is designed around.\nVersion 6.0+ is required for full functionality.\nOther systems can be used, as long as they work with the SLA API\nSLO Aroused NG 3.3.0+ is used through its own API.	**NO_OPT
+		bool helpOSLArousedInstalled = false;	//OSL Aroused//The arousal system that this mod is designed around.\nVersion 6.0+ is required for full functionality.\nOther systems can be used, as long as they work with the SLA API	**NO_OPT
+		bool helpSLOArousedInstalled = false;	//SLO Aroused NG//Used through its own API when installed (3.3.0 or newer).\nArousal is read live for every actor, and the arousal this mod adds shows up there as its own effects.	**NO_OPT
 		bool helpUDInstalled = false;			//Unforgiving Devices//Remember to install the UD patch in the MCM.																										**NO_OPT
 		bool helpQuickLootInstalled = false;	//Quick Loot IE//Allows for events to be triggered when looting an item from a container.																				**NO_OPT
 		bool helpDWDInstalled = false;			//Devious Wicked Devices//Adds event to equip a wicked device. Follows all distrobution settings from the Devious Wicked Devices MCM page.								**NO_OPT

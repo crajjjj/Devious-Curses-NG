@@ -97,13 +97,12 @@ namespace DCURSES {
             float (*GetArousal)(RE::Actor*) = nullptr;
             float (*GetDynamicEffectValue)(RE::Actor*, const char*) = nullptr;
             void (*AddDecayingEffect)(RE::Actor*, const char*, float, float) = nullptr;
+            void (*AddLinearEffect)(RE::Actor*, const char*, float, float, float) = nullptr;
             void (*ClearDynamicEffect)(RE::Actor*, const char*) = nullptr;
         };
 
         constexpr auto SLO_AROUSAL_EFFECT = "DeviousCurses_Arousal";
         constexpr auto SLO_RESET_EFFECT = "DeviousCurses_FrigidWash";
-        // Both effects halve every 12 game hours, SLO Aroused NG's default for arousal other mods add through the SLA API.
-        constexpr float SLO_HALF_LIFE_HOURS = 12.0f;
 
         const SLOArousedAPI* GetSLOAroused() {
             static const std::optional<SLOArousedAPI> api = []() -> std::optional<SLOArousedAPI> {
@@ -115,8 +114,9 @@ namespace DCURSES {
                 result.GetArousal = reinterpret_cast<decltype(result.GetArousal)>(GetProcAddress(dllHandle, "SLA_GetArousal"));
                 result.GetDynamicEffectValue = reinterpret_cast<decltype(result.GetDynamicEffectValue)>(GetProcAddress(dllHandle, "SLA_GetDynamicEffectValue"));
                 result.AddDecayingEffect = reinterpret_cast<decltype(result.AddDecayingEffect)>(GetProcAddress(dllHandle, "SLA_AddDecayingEffect"));
+                result.AddLinearEffect = reinterpret_cast<decltype(result.AddLinearEffect)>(GetProcAddress(dllHandle, "SLA_AddLinearEffect"));
                 result.ClearDynamicEffect = reinterpret_cast<decltype(result.ClearDynamicEffect)>(GetProcAddress(dllHandle, "SLA_ClearDynamicEffect"));
-                if (!result.GetArousal || !result.GetDynamicEffectValue || !result.AddDecayingEffect || !result.ClearDynamicEffect) {
+                if (!result.GetArousal || !result.GetDynamicEffectValue || !result.AddDecayingEffect || !result.AddLinearEffect || !result.ClearDynamicEffect) {
                     log::warn("SLO Aroused NG is older than 3.3.0, using the SLA API.");
                     return std::nullopt;
                 }
@@ -125,6 +125,10 @@ namespace DCURSES {
             }();
             return api ? &*api : nullptr;
         }
+    }
+
+    bool CheckSLOAroused() {
+        return GetSLOAroused() != nullptr;
     }
 
     RE::BSScript::Variable* GetMCMSetting(std::string name, std::string modname, std::string scriptname) {
@@ -436,7 +440,7 @@ namespace DCURSES {
         if (auto slo = GetSLOAroused()) {
             float value = std::clamp(slo->GetDynamicEffectValue(actor, SLO_AROUSAL_EFFECT) + arousal, 0.0f, 100.0f);
             if (value > 0.0f) {
-                slo->AddDecayingEffect(actor, SLO_AROUSAL_EFFECT, value, SLO_HALF_LIFE_HOURS);
+                slo->AddDecayingEffect(actor, SLO_AROUSAL_EFFECT, value, std::max(Settings::GetSingleton()->arousalHalfLife, 1.0f));
             }
             else {
                 slo->ClearDynamicEffect(actor, SLO_AROUSAL_EFFECT);
@@ -452,16 +456,11 @@ namespace DCURSES {
 
     void ScriptingManager::ResetArousal(RE::Actor* actor) {
         if (auto slo = GetSLOAroused()) {
-            // Other mods' effects stay, so cancel whatever is left with a negative effect that wears off.
-            // The old reset effect is left out of the sum, or a second reset would undo the first.
+            // Other mods' effects stay, so hold the total down with -100 that climbs back to 0 evenly over the
+            // set duration. Drinking another one restarts it at -100.
             slo->ClearDynamicEffect(actor, SLO_AROUSAL_EFFECT);
-            float rest = slo->GetArousal(actor) - slo->GetDynamicEffectValue(actor, SLO_RESET_EFFECT);
-            if (rest > 0.0f) {
-                slo->AddDecayingEffect(actor, SLO_RESET_EFFECT, -rest, SLO_HALF_LIFE_HOURS);
-            }
-            else {
-                slo->ClearDynamicEffect(actor, SLO_RESET_EFFECT);
-            }
+            float hours = std::max(Settings::GetSingleton()->arousalPotionDuration, 1.0f);
+            slo->AddLinearEffect(actor, SLO_RESET_EFFECT, -100.0f, 100.0f / hours, 0.0f);
         }
         else {
             ModifyArousal(actor, -1000);

@@ -23,6 +23,8 @@ namespace DCURSES {
 
     bool CheckOSL();
 
+    bool CheckSLOAroused();
+
     class ScriptIntent {
     public:
         std::string script_name;
