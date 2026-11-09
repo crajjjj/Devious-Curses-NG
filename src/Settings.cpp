@@ -47,7 +47,14 @@ namespace DCURSES {
 	}
 
 	RE::BSScript::Variable* MCMSetting(std::string name) {
-		return GetMCMSetting(name, "Devious Curses.esp", "DCurses_MCM");
+		if (auto variable = GetMCMSetting(name, "Devious Curses.esp", "DCurses_MCM")) {
+			return variable;
+		}
+		// An MCM script older than this DLL lacks the newest properties (GetMCMSetting logs which one); read
+		// them as 0 / false instead of crashing in the generated code that dereferences the result.
+		static RE::BSScript::Variable missing;
+		missing = RE::BSScript::Variable();
+		return &missing;
 	}
 
 	void PlayerMessage(Translator trans, bool useSurpriseMode) {

@@ -95,11 +95,14 @@ namespace DCURSES {
         // effects, so this mod adds its own effects instead of writing the shared exposure value.
         struct SLOArousedAPI {
             float (*GetArousal)(RE::Actor*) = nullptr;
-            float (*GetDynamicEffectValue)(RE::Actor*, const char*) = nullptr;
-            void (*AddDecayingEffect)(RE::Actor*, const char*, float, float) = nullptr;
+            void (*ModDynamicEffect)(RE::Actor*, const char*, float, float) = nullptr;
+            void (*SetDynamicEffect)(RE::Actor*, const char*, float, int32_t, float, float) = nullptr;
             void (*AddLinearEffect)(RE::Actor*, const char*, float, float, float) = nullptr;
             void (*ClearDynamicEffect)(RE::Actor*, const char*) = nullptr;
         };
+
+        // SLA_FuncDecay: the value halves every `param` game days.
+        constexpr int32_t SLO_FUNC_DECAY = 1;
 
         constexpr auto SLO_AROUSAL_EFFECT = "DeviousCurses_Arousal";
         constexpr auto SLO_RESET_EFFECT = "DeviousCurses_FrigidWash";
@@ -112,11 +115,11 @@ namespace DCURSES {
                 }
                 SLOArousedAPI result;
                 result.GetArousal = reinterpret_cast<decltype(result.GetArousal)>(GetProcAddress(dllHandle, "SLA_GetArousal"));
-                result.GetDynamicEffectValue = reinterpret_cast<decltype(result.GetDynamicEffectValue)>(GetProcAddress(dllHandle, "SLA_GetDynamicEffectValue"));
-                result.AddDecayingEffect = reinterpret_cast<decltype(result.AddDecayingEffect)>(GetProcAddress(dllHandle, "SLA_AddDecayingEffect"));
+                result.ModDynamicEffect = reinterpret_cast<decltype(result.ModDynamicEffect)>(GetProcAddress(dllHandle, "SLA_ModDynamicEffect"));
+                result.SetDynamicEffect = reinterpret_cast<decltype(result.SetDynamicEffect)>(GetProcAddress(dllHandle, "SLA_SetDynamicEffect"));
                 result.AddLinearEffect = reinterpret_cast<decltype(result.AddLinearEffect)>(GetProcAddress(dllHandle, "SLA_AddLinearEffect"));
                 result.ClearDynamicEffect = reinterpret_cast<decltype(result.ClearDynamicEffect)>(GetProcAddress(dllHandle, "SLA_ClearDynamicEffect"));
-                if (!result.GetArousal || !result.GetDynamicEffectValue || !result.AddDecayingEffect || !result.AddLinearEffect || !result.ClearDynamicEffect) {
+                if (!result.GetArousal || !result.ModDynamicEffect || !result.SetDynamicEffect || !result.AddLinearEffect || !result.ClearDynamicEffect) {
                     log::warn("SLO Aroused NG is older than 3.3.0, using the SLA API.");
                     return std::nullopt;
                 }
@@ -438,12 +441,12 @@ namespace DCURSES {
 
     void ScriptingManager::ModifyArousal(RE::Actor* actor, float arousal) {
         if (auto slo = GetSLOAroused()) {
-            float value = std::clamp(slo->GetDynamicEffectValue(actor, SLO_AROUSAL_EFFECT) + arousal, 0.0f, 100.0f);
-            if (value > 0.0f) {
-                slo->AddDecayingEffect(actor, SLO_AROUSAL_EFFECT, value, std::max(Settings::GetSingleton()->arousalHalfLife, 1.0f));
-            }
-            else {
-                slo->ClearDynamicEffect(actor, SLO_AROUSAL_EFFECT);
+            // One locked add, so calls from the update thread and the main thread never lose each other's change,
+            // then the decay; a zero initial value leaves the value as it is and only sets the function.
+            slo->ModDynamicEffect(actor, SLO_AROUSAL_EFFECT, arousal, arousal < 0.0f ? 0.0f : 100.0f);
+            if (arousal > 0.0f) {
+                float halfLifeDays = std::max(Settings::GetSingleton()->arousalHalfLife, 1.0f) / 24.0f;
+                slo->SetDynamicEffect(actor, SLO_AROUSAL_EFFECT, 0.0f, SLO_FUNC_DECAY, halfLifeDays, 0.0f);
             }
         }
         else if (CheckOSL()) {
