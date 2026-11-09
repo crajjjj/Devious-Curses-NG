@@ -3,7 +3,11 @@
 cmake_minimum_required(VERSION 3.21)
 
 # Set your project name. This will be the name of your SKSE .dll file.
-project(DeviousCurses VERSION 0.9.0 LANGUAGES CXX)
+project(DeviousCurses VERSION 0.9.0.1 LANGUAGES CXX)
+
+# ON builds the DLL alone into dist/: codegen, the MCM scripts and the translations need
+# files the public repository does not carry (translationData, SourceScripts).
+option(DCURSES_DLL_ONLY "Build only the DLL, into dist/" ON)
 
 
 set(sources
@@ -38,7 +42,11 @@ set(sources
 
 
 
-set(OUTPUT_FOLDER "S:/Skyrim/MO2/mods/DeviousCurses")
+if(DCURSES_DLL_ONLY)
+    set(OUTPUT_FOLDER "${CMAKE_SOURCE_DIR}/dist")
+else()
+    set(OUTPUT_FOLDER "S:/Skyrim/MO2/mods/DeviousCurses")
+endif()
 set(QUEST_OUTPUT_FOLDER "S:/Skyrim/MO2/mods/DeviousCursesQuests")
 
 # set(CommonLibSSE_DIR "S:/Skyrim/modding/CommonLibVR/build/debug-msvc-vcpkg-all")
@@ -67,6 +75,10 @@ add_custom_command(
     
     VERBATIM
 )
+
+if(DCURSES_DLL_ONLY)
+    return()
+endif()
 
 add_custom_target(
     Codegen ALL

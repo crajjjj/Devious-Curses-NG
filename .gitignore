@@ -13,3 +13,4 @@ out
 CMakeFiles
 /DCurses_QuestMCM.psc
 vcpkg_installed
+dist

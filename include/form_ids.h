@@ -3,7 +3,7 @@
 using namespace SKSE;
 
 namespace DCURSES {
-constexpr auto DCURSES_VERSION = "0.9.0";
+constexpr auto DCURSES_VERSION = "0.9.0.1";
 
 // SUMMONS
 constexpr auto SUMMON_FAMILIAR = 0x640B5;
