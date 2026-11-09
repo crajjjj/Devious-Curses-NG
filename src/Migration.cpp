@@ -7,7 +7,8 @@ using namespace SKSE;
 
 namespace DCURSES {
 	bool needsMigrationFor(const std::string& current, const std::string& target) {
-		int first[4];
+		// Zeroed: a version with fewer than four parts leaves the stream at EOF, and the missing parts are never written.
+		int first[4] = {};
 		std::istringstream parser(current);
 		parser >> first[0];
 		for (int idx = 1; idx < 4; idx++)
@@ -16,7 +17,7 @@ namespace DCURSES {
 			parser >> first[idx];
 		}
 
-		int last[4];
+		int last[4] = {};
 		std::istringstream parserl(target);
 		parserl >> last[0];
 		for (int idx = 1; idx < 4; idx++)
