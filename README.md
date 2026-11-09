@@ -15,8 +15,9 @@ Adds support for [SLO Aroused NG](https://crajjjj.github.io/SexlabArousedNG/) 3.
 
 Bug fixes:
 
-- A Devious Devices contraption faction left on the player (`zadcNGInContraptionFaction`) made the mod treat every second as a running scene, so oppressive device and Lewd Mark counters stopped for the rest of the save. It is now removed when no contraption holds the player, about 20 seconds after it goes stale or after loading such a save. A `zadAnimatingFaction` held for 5 minutes is logged with the console command to clear it.
-- The Nocturnal piercing never came off, because no spectator ever counted. Spectators now count at any distance, as long as they can see the player.
+- A Devious Devices contraption faction left on the player (`zadcNGInContraptionFaction`) made the mod treat every second as a running scene, so oppressive device and Lewd Mark counters stopped for the rest of the save. It is now removed when the player can move and no contraption holds them, about 20 seconds after it goes stale or after loading such a save. A `zadAnimatingFaction` held for 5 minutes is logged with the console command to clear it.
+- The Nocturnal piercing never came off, because no spectator ever counted. Spectators now count at any distance, as long as they can see the player; the people in the scene do not count.
+- The version check behind settings migration read uninitialized memory, so the 0.9.0 migration could run on every launch, turning debug mode off and a Player Arousal or Tattoos requirement of 0 back to -1.
 
 ### Building
 
