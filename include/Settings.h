@@ -515,7 +515,7 @@ namespace DCURSES {
 		bool helpLewdMarksInstalled = false;	//Lewd Marks//Lewd marks must be installed for Slave Tats Without the Glow Patch.\nINSTALLING WITH GLOW PATCH WILL BREAK SLAVE TATS NG									**NO_OPT
 		bool helpRapeTattoosInstalled = false;	//Rape Tattoos//Rape tattoos is required for the random tattoo event, and is not required for lewd marks.																**NO_OPT
 		//Header Other Integrations
-		bool helpOSLArousedInstalled = false;	//OSL Aroused//The arousal system that this mod is designed around.\nVersion 6.0+ is required for full functionality.\nOther systems can be used, as long as they work with the SLA API\nSLO Aroused NG not supported.	**NO_OPT
+		bool helpOSLArousedInstalled = false;	//OSL Aroused//The arousal system that this mod is designed around.\nVersion 6.0+ is required for full functionality.\nOther systems can be used, as long as they work with the SLA API\nSLO Aroused NG 3.3.0+ is used through its own API.	**NO_OPT
 		bool helpUDInstalled = false;			//Unforgiving Devices//Remember to install the UD patch in the MCM.																										**NO_OPT
 		bool helpQuickLootInstalled = false;	//Quick Loot IE//Allows for events to be triggered when looting an item from a container.																				**NO_OPT
 		bool helpDWDInstalled = false;			//Devious Wicked Devices//Adds event to equip a wicked device. Follows all distrobution settings from the Devious Wicked Devices MCM page.								**NO_OPT

@@ -90,6 +90,43 @@ namespace DCURSES {
         return true;
     }
 
+    namespace {
+        // SLO Aroused NG 3.3.0+ exports a C API from its DLL. Arousal there is the sum of named
+        // effects, so this mod adds its own effects instead of writing the shared exposure value.
+        struct SLOArousedAPI {
+            float (*GetArousal)(RE::Actor*) = nullptr;
+            float (*GetDynamicEffectValue)(RE::Actor*, const char*) = nullptr;
+            void (*AddDecayingEffect)(RE::Actor*, const char*, float, float) = nullptr;
+            void (*ClearDynamicEffect)(RE::Actor*, const char*) = nullptr;
+        };
+
+        constexpr auto SLO_AROUSAL_EFFECT = "DeviousCurses_Arousal";
+        constexpr auto SLO_RESET_EFFECT = "DeviousCurses_FrigidWash";
+        // Both effects halve every 12 game hours, SLO Aroused NG's default for arousal other mods add through the SLA API.
+        constexpr float SLO_HALF_LIFE_HOURS = 12.0f;
+
+        const SLOArousedAPI* GetSLOAroused() {
+            static const std::optional<SLOArousedAPI> api = []() -> std::optional<SLOArousedAPI> {
+                HMODULE dllHandle = GetModuleHandle(L"SexlabArousedNG.dll");
+                if (dllHandle == NULL) {
+                    return std::nullopt;
+                }
+                SLOArousedAPI result;
+                result.GetArousal = reinterpret_cast<decltype(result.GetArousal)>(GetProcAddress(dllHandle, "SLA_GetArousal"));
+                result.GetDynamicEffectValue = reinterpret_cast<decltype(result.GetDynamicEffectValue)>(GetProcAddress(dllHandle, "SLA_GetDynamicEffectValue"));
+                result.AddDecayingEffect = reinterpret_cast<decltype(result.AddDecayingEffect)>(GetProcAddress(dllHandle, "SLA_AddDecayingEffect"));
+                result.ClearDynamicEffect = reinterpret_cast<decltype(result.ClearDynamicEffect)>(GetProcAddress(dllHandle, "SLA_ClearDynamicEffect"));
+                if (!result.GetArousal || !result.GetDynamicEffectValue || !result.AddDecayingEffect || !result.ClearDynamicEffect) {
+                    log::warn("SLO Aroused NG is older than 3.3.0, using the SLA API.");
+                    return std::nullopt;
+                }
+                log::info("SLO Aroused NG found, using its native API.");
+                return result;
+            }();
+            return api ? &*api : nullptr;
+        }
+    }
+
     RE::BSScript::Variable* GetMCMSetting(std::string name, std::string modname, std::string scriptname) {
         RE::TESForm* form = StaticDataHolder::GetSingleton()->LookupForm(DCURSES_MCM, modname);
         if (!form) {
@@ -362,12 +399,22 @@ namespace DCURSES {
     }
 
     int ScriptingManager::GetArousal(RE::Actor* actor) {
+        if (auto slo = GetSLOAroused()) {
+            // Live value for any actor; the faction rank only moves for actors in an update cycle.
+            return static_cast<int>(std::clamp(slo->GetArousal(actor), 0.0f, 100.0f));
+        }
         RE::TESFaction* sla_arousal = StaticDataHolder::GetSingleton()->LookupForm<RE::TESFaction>(0x3FC36, "SexLabAroused.esm");
         auto arousal = actor->GetFactionRank(sla_arousal, actor == RE::PlayerCharacter::GetSingleton());
         return arousal;
     }
 
     void ScriptingManager::WithArousal(RE::Actor* actor, std::function<void(float)> func) {
+        if (auto slo = GetSLOAroused()) {
+            // Writes through the native API apply at once, so this read already sees them.
+            func(std::clamp(slo->GetArousal(actor), 0.0f, 100.0f));
+            return;
+        }
+
         RE::BSScript::IFunctionArguments* args = RE::MakeFunctionArguments<RE::Actor*>(std::move(actor));
 
         if (CheckOSL()) {
@@ -386,11 +433,38 @@ namespace DCURSES {
     }
 
     void ScriptingManager::ModifyArousal(RE::Actor* actor, float arousal) {
-        if (CheckOSL()) {
+        if (auto slo = GetSLOAroused()) {
+            float value = std::clamp(slo->GetDynamicEffectValue(actor, SLO_AROUSAL_EFFECT) + arousal, 0.0f, 100.0f);
+            if (value > 0.0f) {
+                slo->AddDecayingEffect(actor, SLO_AROUSAL_EFFECT, value, SLO_HALF_LIFE_HOURS);
+            }
+            else {
+                slo->ClearDynamicEffect(actor, SLO_AROUSAL_EFFECT);
+            }
+        }
+        else if (CheckOSL()) {
             OSL_ModifyArousal(actor, arousal);
         }
         else {
             Generic_ModifyArousal(actor, static_cast<int>(arousal));
+        }
+    }
+
+    void ScriptingManager::ResetArousal(RE::Actor* actor) {
+        if (auto slo = GetSLOAroused()) {
+            // Other mods' effects stay, so cancel whatever is left with a negative effect that wears off.
+            // The old reset effect is left out of the sum, or a second reset would undo the first.
+            slo->ClearDynamicEffect(actor, SLO_AROUSAL_EFFECT);
+            float rest = slo->GetArousal(actor) - slo->GetDynamicEffectValue(actor, SLO_RESET_EFFECT);
+            if (rest > 0.0f) {
+                slo->AddDecayingEffect(actor, SLO_RESET_EFFECT, -rest, SLO_HALF_LIFE_HOURS);
+            }
+            else {
+                slo->ClearDynamicEffect(actor, SLO_RESET_EFFECT);
+            }
+        }
+        else {
+            ModifyArousal(actor, -1000);
         }
     }
 

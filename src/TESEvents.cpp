@@ -194,7 +194,7 @@ namespace DCURSES {
                 PlayerMessage(Translator(Translation::ItemTattooCharm));
             }
             else if (equipmentForm == arouaslPotion) {
-                ScriptingManager().ModifyArousal(player, -1000);
+                ScriptingManager().ResetArousal(player);
                 ScriptingManager().OSL_ModifyLibido(player, -settings->arousalPotionLibido);
 
                 PlayerMessage(Translator(Translation::ItemArousalPotion));

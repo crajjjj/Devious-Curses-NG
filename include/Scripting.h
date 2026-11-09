@@ -151,6 +151,8 @@ namespace DCURSES {
 
         void ModifyArousal(RE::Actor* actor, float arousal);
 
+        void ResetArousal(RE::Actor* actor);
+
         void Generic_ModifyArousal(RE::Actor* actor, int arousal);
 
         void OSL_ModifyArousal(RE::Actor* actor, float arousal);
