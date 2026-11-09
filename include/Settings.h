@@ -198,13 +198,13 @@ namespace DCURSES {
 		//Header Allure
 		int LMAllureWeight = 10;				//Allure Mark Weight//This mark will make everyone around you horny all the time.//{0}//(0,500,1)							?:? flag_LewdMarks
 		int LMAllureMod = 5;					//Allure Arousal//How much each nearby character's arousal will change per minute.//{0}//(0,200,1)							?:? flag_LewdMarks
-		int LMAllureSex = 25;					//Sex Count//How many times you have to have sex before the mark will fade.//{0}//(3,100,1)									?:? flag_LewdMarks
+		int LMAllureSex = 25;					//Sex Count//How many times you have to have sex before the mark will fade.//{0}//(3,500,1)									?:? flag_LewdMarks
 		bool LMAllureSkipRequirements = true;	//Skip Sex Requirements//Requirements for both the player and NPC's will be skipped	for random sex.							?:? flag_LewdMarks
 		color LMAllureColor = 0xcf11c5;			//Color//Color for mark.																									?:? flag_LewdMarks
 		//Header Heat
 		int LMHeatWeight = 10;					//Heat Mark Weight//This mark will constantly make you horny.//{0}//(0,500,1)												?:? flag_LewdMarks
 		int LMHeatMod = 30;						//Heat Arousal//How much your arousal will change per minute.//{0}//(0,200,1)												?:? flag_LewdMarks
-		int LMHeatContainerCount = 50;			//Container Count//How many containers you must open before the mark will fade.//{0}//(10,200,1)							?:? flag_LewdMarks
+		int LMHeatContainerCount = 50;			//Container Count//How many containers you must open before the mark will fade.//{0}//(10,1000,1)							?:? flag_LewdMarks
 		color LMHeatColor = 0xe3143a;			//Color//Color for mark.																									?:? flag_LewdMarks
 		//Header Branding
 		int LMBrandingWeight = 10;				//Branding Mark Weight//This mark will force you to have a certain number of tattoos!//{0}//(0,500,1)						?:? flag_RT_LM
@@ -224,20 +224,20 @@ namespace DCURSES {
 		float LMBondageModifier = 5.0f;			//Event Modifier//Modifier to event chance with the mark.\nThis will only increase the chance of the Bondage Curse, and curses triggerd this way won't affect followers.//{1}X//(1,100,0.1)		?:? flag_LewdMarks
 		//float LMBondageChance = 5.0f;			//Chance//How likely an item might be equipped from your inventory per 15 seconds.//{1}%//(0,100,0.1)																							?:? flag_LewdMarks
 		int LMBondageDeviceCapAdd = 3;			//Restraints Cap Modifier//How much higher the Restraints Cap for events will be.//{0}//(0,10,1)																								?:? flag_LewdMarks
-		int LMBondageDeviceCount = 25;			//Device Count//How many devices need to be equipped before the mark will fade.\nThis counts items equipped by the bondage curse and from your inventory.//{0}//(1,500,1)						?:? flag_LewdMarks
+		int LMBondageDeviceCount = 25;			//Device Count//How many devices need to be equipped before the mark will fade.\nThis counts items equipped by the bondage curse and from your inventory.//{0}//(1,2000,1)						?:? flag_LewdMarks
 		color LMBondageColor = 0x7908cf;		//Color//Color for mark.																																										?:? flag_LewdMarks
 		//Header Nudity
 		//Flag flag_LMStripBody					//LMNudityChestOnly && flag_LewdMarks == 0
 		int LMNudityWeight = 15;				//Nudity Mark Weight//With this mark you will be unable to wear any clothes.//{0}//(0,500,1)								?:? flag_LewdMarks
 		bool LMNudityChestOnly = false;			//Chest Only//With this enabled only chest armor will be checked and removed. Otherwise all armor will be unequipped.		?:? flag_LewdMarks **RELOAD
 		text LMNudityAditionalForms = "";		//Strip Slots//A comma separated list of additional slots to strip. Will not strip devices.\nFor example: 46,47,49,52.		?:? flag_LMStripBody
-		int LMNudityTalkTimes = 35;				//Dialogue Times//How many times you have to talk to different characters before the mark will fade.//{0}//(3,100,1)		?:? flag_LewdMarks
+		int LMNudityTalkTimes = 35;				//Dialogue Times//How many times you have to talk to different characters before the mark will fade.//{0}//(3,500,1)		?:? flag_LewdMarks
 		bool LMNuditySkipGagged = true;			//Skip When Gagged//The Nudity Mark counter will not decrease when the player is gagged. You must actually talk to people.	?:? flag_LewdMarks
 		color LMNudityColor = 0xd676cb;			//Color//Color for mark.																									?:? flag_LewdMarks
 		//Header Painslut
 		int LMPainslutWeight = 10;				//Painslut Mark Weight//This mark will make you more aroused whenever you are hit by an enemy!//{0}//(0,500,1)				?:? flag_LewdMarks
 		int LMPainslutMod = 5;					//Arousal Change//How much arousal you will gain when getting hit.//{0}//(1,100,1)											?:? flag_LewdMarks
-		int LMPainslutCount = 25;				//Enemy Count//How many enemies you must kill at high arousal.//{0}//(1,500,1)												?:? flag_LewdMarks
+		int LMPainslutCount = 25;				//Enemy Count//How many enemies you must kill at high arousal.//{0}//(1,1000,1)												?:? flag_LewdMarks
 		float LMPainslutSexChance = 15.0f;		//Sex Chance//Chance that your attacker will have sex with you when you are hit at high arousal.//{1}//(0,100,0.1)			?:? flag_LewdMarks
 		int LMPainslutArousal = 90;				//High Arousal//What counts for "high arousal" for this mark.//{0}//(1,100,1)												?:? flag_LewdMarks
 		color LMPainslutColor = 0x911300;		//Color//Color for mark.																									?:? flag_LewdMarks
@@ -341,7 +341,7 @@ namespace DCURSES {
 		bool surpriseMode = false;				//Surprise Mode//Will disable most message boxes when an event happens.\nYou need to figure out what changed!
 		float rDeviceBaseChance = 1.5f;			//Device Base Chance//Chance to loot a random bondage item from a container or a dead body.//{1}%//(0,100,0.1)
 		float rDeviceLuckyBonus = 2.5f;			//Device Lucky Bonus//Device base chance will be multiplied by this value if you are lucky.//{1}//(1,10,0.1)
-		float wardingCharmChance = 0.5f;		//Warding Charm Chance//Chance to find a warding charm. These charms will stop a curse from affecting you!\nThe more you have, the less likely you are to find more.//{2}%//(1,10,0.01)
+		float wardingCharmChance = 0.5f;		//Warding Charm Chance//Chance to find a warding charm. These charms will stop a curse from affecting you!\nThe more you have, the less likely you are to find more.//{2}%//(0,10,0.01)
 		bool dragonHoard = true;				//Dragon Hoards//Dragons will drop more gold, but the gold they carry is likely to be cursed.\nWith this enabled some settings might be ignored when looting dragons.
 		bool bossExtraGold = true;				//Boss Chest Extra Gold//Boss chests will have extra gold.
 		bool useThemes = false;					//Use Device Themes//Events that equip the player with devices will try to keep all devices equipped to a consistent theme.\nWARNING: this will increase the time taken to run each event and may cause lag spikes.
