@@ -621,7 +621,7 @@ namespace DCURSES {
 		if (!Settings::GetSingleton()->oppMadnessOnlyDevices) {
 			OppMadnessPlayerOrgasm();
 		}
-		OppNocturnalPlayerSex();
+		OppNocturnalPlayerSex(actors);
 	}
 
 	void P_DDPlayerOrgasm(RE::StaticFunctionTag*) {

@@ -77,7 +77,7 @@ namespace DCURSES {
 
 	void OppNocturnalHands(bool fromRecast = false);
 	void OppNocturnalTryRecast();
-	void OppNocturnalPlayerSex();
+	void OppNocturnalPlayerSex(const RE::BSTArray<RE::Actor*>& partners);
 
 	void OppDoMadnessEffect(bool ending_event = false);
 	void OppMadnessPlayerOrgasm();

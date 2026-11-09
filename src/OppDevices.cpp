@@ -1141,10 +1141,14 @@ namespace DCURSES {
 		}
 	}
 
-	void OppNocturnalPlayerSex() {
+	void OppNocturnalPlayerSex(const RE::BSTArray<RE::Actor*>& partners) {
 		if (IsWearingOppNocturnal()) {
 			auto player = RE::PlayerCharacter::GetSingleton();
 			auto watching_actors = Util::GetWatchingActors(player);
+			// The people in the scene face the player too, but only bystanders count as spectators.
+			std::erase_if(watching_actors, [&partners](RE::Actor* actor) {
+				return std::find(partners.begin(), partners.end(), actor) != partners.end();
+			});
 			auto oppdCounters = Serialized::GetOppDeviceCounters();
 			log::trace("Sex: {} watching", watching_actors.size());
 			if (watching_actors.size() >= Settings::GetSingleton()->oppNocturnalPeople) {
