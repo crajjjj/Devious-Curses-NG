@@ -12,6 +12,11 @@ Adds support for [SLO Aroused NG](https://crajjjj.github.io/SexlabArousedNG/) 3.
 - Arousal this mod adds goes into its own effect, `DeviousCurses_Arousal`, which halves every 12 game hours.
 - A Frigid Wash clears that effect and cancels the rest of the drinker's arousal with `DeviousCurses_FrigidWash`, which wears off at the same rate. Libido is an OSL Aroused feature, so the libido setting still needs OSL Aroused.
 
+Bug fixes:
+
+- A Devious Devices contraption faction left on the player (`zadcNGInContraptionFaction`) made the mod treat every second as a running scene, so oppressive device and Lewd Mark counters stopped for the rest of the save. It is now removed when no contraption holds the player, about 20 seconds after it goes stale or after loading such a save. A `zadAnimatingFaction` held for 5 minutes is logged with the console command to clear it.
+- The Nocturnal piercing never came off, because no spectator ever counted. Spectators now count at any distance, as long as they can see the player.
+
 ### Building
 
 Run `build.cmd` (Visual Studio 2022 with the C++ and CMake workloads; vcpkg is the copy bundled with Visual Studio). It builds the DLL alone into `dist\SKSE\Plugins\`.
