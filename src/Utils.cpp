@@ -259,7 +259,8 @@ namespace DCURSES::Util {
 							if (heading < 65.0f) {
 								float distance = actorPos.GetDistance(targetPos);
 
-								if (distance < radius && heading < 65.0f) {
+								// A negative radius (the default) means no distance limit; line of sight and detection still apply.
+								if ((radius < 0 || distance < radius) && heading < 65.0f) {
 									int detection = actor->RequestDetectionLevel(target, RE::DETECTION_PRIORITY::kCritical);
 									bool los_ = false;
 									bool los = actor->HasLineOfSight(target, los_);
