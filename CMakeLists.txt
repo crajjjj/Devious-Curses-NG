@@ -5,8 +5,8 @@ cmake_minimum_required(VERSION 3.21)
 # Set your project name. This will be the name of your SKSE .dll file.
 project(DeviousCurses VERSION 0.9.0.1 LANGUAGES CXX)
 
-# ON builds the DLL alone into dist/: codegen, the MCM scripts and the translations need
-# files the public repository does not carry (translationData, SourceScripts).
+# ON builds the DLL alone into dist/. OFF is the upstream build: codegen, the MCM scripts and the
+# translations, which needs the private Quests sources (src/Quest holds stubs here) and SourceScripts.
 option(DCURSES_DLL_ONLY "Build only the DLL, into dist/" ON)
 
 

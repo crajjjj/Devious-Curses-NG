@@ -1,5 +1,6 @@
 # Runs CODEGEN.py without the Quests MCM, whose sources are not public.
-# Writes DCurses_MCM.psc, translationData/ and the generated parts of src/Settings.cpp.
+# Writes DCurses_MCM.psc, translationData/ (MCM strings and the event-text JSON), Version.txt, the version
+# in include/form_ids.h and the CODEGEN regions of src/Settings.cpp, src/Devices.cpp and src/Translation.cpp.
 # Usage: python tools/codegen_public.py
 import os
 
