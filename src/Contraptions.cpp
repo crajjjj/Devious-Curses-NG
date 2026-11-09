@@ -23,31 +23,27 @@ namespace DCURSES {
 
 	RE::TESObjectREFR* GetContraptionForActor(RE::Actor* actor) {
 		if (!actor) return nullptr;
-		RE::TESObjectREFR* ref = nullptr;
 
-		actor->GetParentCell()->ForEachReferenceInRange(actor->GetPosition(), 500, [&](RE::TESObjectREFR* refr) {
-			auto scriptObject = ContraptionsGetRefScript(refr);
-
-			if (!scriptObject) {
-				return RE::BSContainer::ForEachResult::kContinue;
-			}
-
-			RE::BSScript::Variable* user = scriptObject->GetProperty("User");
-			if (!user) {
-				return RE::BSContainer::ForEachResult::kContinue;
-			}
-
-			auto user_actor = user->Unpack<RE::Actor*>();
-
-			if (actor == user_actor) {
-				//log::info("Found furniture {} for actor {}", refr->GetName(), actor->GetName());
-				ref = refr;
-			}
-
+		// Collect first: the walk holds each cell's lock, and the script lookups should not run under it.
+		std::vector<RE::TESObjectREFR*> nearby;
+		RE::TES::GetSingleton()->ForEachReferenceInRange(actor, 500, [&](RE::TESObjectREFR* refr) {
+			nearby.push_back(refr);
 			return RE::BSContainer::ForEachResult::kContinue;
 		});
 
-		return ref;
+		for (auto refr : nearby) {
+			auto scriptObject = ContraptionsGetRefScript(refr);
+			if (!scriptObject) {
+				continue;
+			}
+
+			RE::BSScript::Variable* user = scriptObject->GetProperty("User");
+			if (user && user->Unpack<RE::Actor*>() == actor) {
+				return refr;
+			}
+		}
+
+		return nullptr;
 	}
 
 	RE::TESObjectACTI* CreateAndLockContraption(RE::Actor* actor) {
@@ -74,5 +70,24 @@ namespace DCURSES {
 				});
 			});
 		return contraption;
+	}
+
+	void ClearStaleContraptionFaction() {
+		// DDC removes the faction only when it unlocks the actor, so a contraption lost any other way leaves it on
+		// for good, and the update loop then skips every refresh as if a scene were running. Two misses in a row
+		// before acting, so a lock or unlock in progress is never mistaken for a stale faction.
+		static int misses = 0;
+		auto player = RE::PlayerCharacter::GetSingleton();
+		auto faction = StaticDataHolder::GetSingleton()->LookupForm<RE::TESFaction>(ZADC_IN_CONTRAPTION_FACTION, "Devious Devices - Contraptions.esm");
+		if (!faction || !player->IsInFaction(faction) || GetContraptionForActor(player)) {
+			misses = 0;
+			return;
+		}
+		if (++misses < 2) {
+			return;
+		}
+		misses = 0;
+		log::warn("Player has the contraption faction, but no contraption holds the player. Removing the faction.");
+		player->RemoveFromFaction(faction);
 	}
 }

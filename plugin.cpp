@@ -23,6 +23,7 @@ add stuff
 #include "Themes.h"
 #include "Translation.h"
 #include "Consequences.h"
+#include "Contraptions.h"
 
 #include "Quest/QuestSettings.h"
 #include "Quest/QuestEvents.h"
@@ -73,6 +74,8 @@ namespace DCURSES {
 
         std::thread{ [] {
             bool shouldSkipNextLoop = false;
+            int contraptionSeconds = 0;
+            int zadAnimatingSeconds = 0;
             while (true) {
                 std::this_thread::sleep_for(1000ms);
                 
@@ -116,11 +119,29 @@ namespace DCURSES {
 
                 RE::TESFaction* SexlabAnimatingFaction = StaticDataHolder::GetSingleton()->LookupForm<RE::TESFaction>(0x00E50F, "SexLab.esm");
                 RE::TESFaction* ZadAnimatingFaction = StaticDataHolder::GetSingleton()->LookupForm<RE::TESFaction>(0x029567, "Devious Devices - Integration.esm");
-                RE::TESFaction* zadcNGInContraptionFaction = StaticDataHolder::GetSingleton()->LookupForm<RE::TESFaction>(0x097E0A, "Devious Devices - Contraptions.esm");
+                RE::TESFaction* zadcNGInContraptionFaction = StaticDataHolder::GetSingleton()->LookupForm<RE::TESFaction>(ZADC_IN_CONTRAPTION_FACTION, "Devious Devices - Contraptions.esm");
 
                 if (player->IsInFaction(SexlabAnimatingFaction)) {
                     Serialized::GetCounters()->clock_lastSex = 0;
                     Serialized::GetCounters()->SinceLastSex = 0;
+                }
+
+                // These factions pause every refresh below, so one left on by mistake stops the mod for the rest of the save.
+                if (player->IsInFaction(zadcNGInContraptionFaction)) {
+                    if (++contraptionSeconds % 10 == 0) {
+                        SKSE::GetTaskInterface()->AddTask([] { ClearStaleContraptionFaction(); });
+                    }
+                }
+                else {
+                    contraptionSeconds = 0;
+                }
+                if (player->IsInFaction(ZadAnimatingFaction) && !player->IsInFaction(SexlabAnimatingFaction)) {
+                    if (++zadAnimatingSeconds == 300) {
+                        log::warn("Player has been in zadAnimatingFaction for 5 minutes, which pauses this mod. If no Devious Devices animation is playing, it is stuck: player.removefromfaction {:08X}", ZadAnimatingFaction->GetFormID());
+                    }
+                }
+                else {
+                    zadAnimatingSeconds = 0;
                 }
 
                 bool isAnimating = player->IsInFaction(SexlabAnimatingFaction) || player->IsInFaction(ZadAnimatingFaction) || player->IsInFaction(zadcNGInContraptionFaction);

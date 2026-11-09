@@ -8,4 +8,9 @@ namespace DCURSES {
 	RE::TESObjectREFR* GetContraptionForActor(RE::Actor* actor);
 
 	RE::TESObjectACTI* CreateAndLockContraption(RE::Actor* actor);
+
+	constexpr auto ZADC_IN_CONTRAPTION_FACTION = 0x097E0A;
+
+	// Main thread only. Removes the "in contraption" faction from the player when no contraption holds them.
+	void ClearStaleContraptionFaction();
 }
