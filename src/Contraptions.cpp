@@ -25,9 +25,13 @@ namespace DCURSES {
 		if (!actor) return nullptr;
 
 		// Collect first: the walk holds each cell's lock, and the script lookups should not run under it.
+		// Contraptions are activators; the type check keeps the script lookups off every other ref.
 		std::vector<RE::TESObjectREFR*> nearby;
 		RE::TES::GetSingleton()->ForEachReferenceInRange(actor, 500, [&](RE::TESObjectREFR* refr) {
-			nearby.push_back(refr);
+			auto base = refr->GetBaseObject();
+			if (base && (base->Is(RE::FormType::Activator) || base->Is(RE::FormType::Furniture))) {
+				nearby.push_back(refr);
+			}
 			return RE::BSContainer::ForEachResult::kContinue;
 		});
 
@@ -74,19 +78,24 @@ namespace DCURSES {
 
 	void ClearStaleContraptionFaction() {
 		// DDC removes the faction only when it unlocks the actor, so a contraption lost any other way leaves it on
-		// for good, and the update loop then skips every refresh as if a scene were running. Two misses in a row
-		// before acting, so a lock or unlock in progress is never mistaken for a stale faction.
-		static int misses = 0;
+		// for good, and the update loop then skips every refresh as if a scene were running.
+		// DDC disables the player's movement for as long as it holds them, so with movement disabled the faction is
+		// left alone without looking further. Otherwise it takes two misses about 10 seconds apart, so a lock or
+		// unlock in progress is never mistaken for a stale faction; a longer gap starts the count over.
+		static std::chrono::steady_clock::time_point lastMiss{};
 		auto player = RE::PlayerCharacter::GetSingleton();
 		auto faction = StaticDataHolder::GetSingleton()->LookupForm<RE::TESFaction>(ZADC_IN_CONTRAPTION_FACTION, "Devious Devices - Contraptions.esm");
-		if (!faction || !player->IsInFaction(faction) || GetContraptionForActor(player)) {
-			misses = 0;
+		auto controls = RE::ControlMap::GetSingleton();
+		if (!faction || !player->IsInFaction(faction) || !controls || !controls->IsMovementControlsEnabled() || GetContraptionForActor(player)) {
+			lastMiss = {};
 			return;
 		}
-		if (++misses < 2) {
+		auto now = std::chrono::steady_clock::now();
+		if (lastMiss == std::chrono::steady_clock::time_point{} || now - lastMiss > 15s) {
+			lastMiss = now;
 			return;
 		}
-		misses = 0;
+		lastMiss = {};
 		log::warn("Player has the contraption faction, but no contraption holds the player. Removing the faction.");
 		player->RemoveFromFaction(faction);
 	}
